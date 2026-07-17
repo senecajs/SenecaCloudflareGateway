@@ -4,6 +4,9 @@ import Cookie from 'cookie'
 
 import { Open } from 'gubu'
 
+import { prepareCloudflareCookieAuth } from './cloudflare-cookie-auth'
+import type { CloudflareCookieAuthSpec } from './cloudflare-cookie-auth'
+
 type GatewayCloudflareOptions = {
   auth?: {
     token: {
@@ -191,7 +194,18 @@ gateway_cloudflare.defaults = {
 }
 
 export default gateway_cloudflare
+export { prepareCloudflareCookieAuth }
+export type { CloudflareCookieAuthSpec }
 
 if ('undefined' !== typeof module) {
+  // Overwriting module.exports (rather than letting TS's own commonjs
+  // interop attach named exports as properties of it) matches gateway-azure/
+  // gateway-lambda's convention: require('@seneca/gateway-cloudflare') must
+  // resolve to the plugin function directly, since Seneca's own .use()
+  // plugin loader expects that shape. That overwrite would otherwise
+  // silently drop prepareCloudflareCookieAuth from the CJS exports object,
+  // so it's re-attached as a property immediately after.
   module.exports = gateway_cloudflare
+  module.exports.prepareCloudflareCookieAuth = prepareCloudflareCookieAuth
+  module.exports.default = gateway_cloudflare
 }
