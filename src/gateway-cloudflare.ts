@@ -77,14 +77,15 @@ function gateway_cloudflare(this: any, options: GatewayCloudflareOptions) {
 
     const bodyText =
       'GET' === method || 'HEAD' === method ? '' : await request.text()
+    // On malformed JSON, parseJSON returns the parse Error itself (with a
+    // .handler$ property attached, not a plain {error$} object) — verified
+    // against the installed @seneca/gateway source. gateway-express (the
+    // one other plugin that also manually parses a raw string body via
+    // this same export) doesn't special-case that result at all; it just
+    // passes it straight through and lets Seneca's own action-not-found
+    // path handle it. Matching that precedent rather than inventing a
+    // 400 short-circuit gateway-express itself doesn't have.
     const body: any = bodyText ? parseJSON(bodyText) : {}
-
-    if (body.error$) {
-      return new Response(JSON.stringify(body), {
-        status: 400,
-        headers: resHeaders,
-      })
-    }
 
     const headers = Object.fromEntries(request.headers)
     const query = Object.fromEntries(url.searchParams)
