@@ -13,8 +13,8 @@ import Cookie from 'cookie'
 // cloudflare_cookie spec into @seneca/gateway-auth itself is intended
 // for later — this is the near-term equivalent, not a permanent fork.
 //
-// Call this directly (not via `.use('gateway-auth', {spec:{cloudflare_cookie:...}})`,
-// since that spec name doesn't exist) after loading gateway-cloudflare:
+// Call this directly (not via `.use('gateway-auth', {spec:{...}})` — that
+// spec name doesn't exist) after loading gateway-cloudflare:
 //
 //   seneca.use('gateway-cloudflare', {...})
 //   await prepareCloudflareCookieAuth(seneca, {

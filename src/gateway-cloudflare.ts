@@ -95,7 +95,7 @@ function gateway_cloudflare(this: any, options: GatewayCloudflareOptions) {
 
     // shallow copy for better control of the body, matching
     // gateway-azure/gateway-lambda's own convention
-    let json: any = { ...body }
+    const json: any = { ...body }
 
     json.gateway = {
       // Workers routing (wrangler.toml route patterns) resolves path
@@ -107,7 +107,7 @@ function gateway_cloudflare(this: any, options: GatewayCloudflareOptions) {
       headers,
     }
 
-    let result: any = await gateway(json, {
+    const result: any = await gateway(json, {
       req: request,
       env: ctx.env,
       execCtx: ctx.execCtx,
@@ -115,7 +115,7 @@ function gateway_cloudflare(this: any, options: GatewayCloudflareOptions) {
 
     let status = 200
 
-    let gateway$: GatewayCloudflareDirective = result.gateway$
+    const gateway$: GatewayCloudflareDirective = result.gateway$
 
     if (gateway$) {
       delete result.gateway$
