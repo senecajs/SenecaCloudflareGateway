@@ -9,7 +9,7 @@
   "author": "Richard Rodger - richardrodger.com",
   "repository": {
     "type": "git",
-    "url": "git://github.com/senecajs/seneca-gateway-cloudflare.git"
+    "url": "https://github.com/senecajs/SenecaCloudflareGateway"
   },
   "keywords": [
     "seneca",
