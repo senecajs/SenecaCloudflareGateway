@@ -66,7 +66,7 @@ export default {
 
 ## Status
 
-Early (`v0.0.1`) — built for [night-sky-logbook][]'s Cloudflare deploy
+Early (`v0.1.0`) — built for [night-sky-logbook][]'s Cloudflare deploy
 target. The `handler` adapter itself is unit-tested against Node's
 native `Request`/`Response` (no Miniflare needed for that). Whether
 Seneca's own plugin-loading mechanism (`use-plugin`, which relies on a
