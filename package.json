@@ -1,6 +1,6 @@
 {
   "name": "@seneca/gateway-cloudflare",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Handle incoming messages within Cloudflare Workers.",
   "main": "dist/gateway-cloudflare.js",
   "type": "commonjs",
@@ -60,8 +60,16 @@
   },
   "files": [
     "README.md",
+    "CHANGES.md",
     "LICENSE",
     "src",
     "dist"
-  ]
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
