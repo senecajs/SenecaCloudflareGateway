@@ -2,7 +2,7 @@
 
 import Cookie from 'cookie'
 
-import { Open } from 'gubu'
+import type Seneca from 'seneca'
 
 import { prepareCloudflareCookieAuth } from './cloudflare-cookie-auth'
 import type { CloudflareCookieAuthSpec } from './cloudflare-cookie-auth'
@@ -50,7 +50,10 @@ type GatewayCloudflareDirective = {
 // used anywhere in this project, and Workers routes are matched by
 // wrangler.toml before this handler ever runs, so there's no path
 // information this handler needs beyond the message body itself.
-function gateway_cloudflare(this: any, options: GatewayCloudflareOptions) {
+function gateway_cloudflare(
+  this: Seneca.Instance,
+  options: GatewayCloudflareOptions,
+) {
   const seneca: any = this
 
   const tag = seneca.plugin.tag
@@ -173,25 +176,30 @@ function gateway_cloudflare(this: any, options: GatewayCloudflareOptions) {
   }
 }
 
-// Default options.
-gateway_cloudflare.defaults = {
+// Default options, built with the validator that Seneca passes in.
+// auth.cookie and headers are open: they accept keys not named here.
+gateway_cloudflare.defaults = ({
+  valid,
+}: {
+  valid: Seneca.Instance['valid']
+}): Record<string, any> => ({
   auth: {
     token: {
       name: 'seneca-auth',
     },
-    cookie: Open({
+    cookie: valid.Open({
       httpOnly: true,
       sameSite: 'None',
       secure: true,
       path: '/',
     }),
   },
-  headers: Open({
+  headers: valid.Open({
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Credentials': 'true',
   }),
-}
+})
 
 export default gateway_cloudflare
 export { prepareCloudflareCookieAuth }

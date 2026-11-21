@@ -25,10 +25,10 @@ workaround; an upstream patch adding a real `cloudflare_cookie` spec to
 ## Install
 
 ```sh
-npm install seneca
-npm install @seneca/gateway
-npm install @seneca/gateway-cloudflare
+npm install seneca@^4 @seneca/gateway @seneca/gateway-cloudflare
 ```
+
+Needs Seneca 4 and Node.js 24 or later.
 
 ## Quick Example
 
@@ -39,8 +39,7 @@ import GatewayCloudflare from '@seneca/gateway-cloudflare'
 import { prepareCloudflareCookieAuth } from '@seneca/gateway-cloudflare'
 
 const seneca = Seneca()
-  .use('promisify')
-  .use('gateway', { allow: { 'role:auth,cmd:signin': true } })
+  .use('@seneca/gateway', { allow: { 'role:auth,cmd:signin': true } })
   .use(GatewayCloudflare, {
     auth: { token: { name: 'my-session' } },
   })
@@ -79,7 +78,7 @@ For more examples, see the [tests][].
 
 ### Seneca compatibility
 
-Supports Seneca versions **3.x** and above.
+Supports Seneca **4.x**, with `@seneca/gateway` 2.x.
 
 [Seneca.js]: https://www.npmjs.com/package/seneca
 [Cloudflare Workers]: https://developers.cloudflare.com/workers/
