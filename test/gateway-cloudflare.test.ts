@@ -8,8 +8,7 @@ import { prepareCloudflareCookieAuth } from '../src/cloudflare-cookie-auth'
 function makeSeneca() {
   return Seneca({ legacy: false })
     .test()
-    .use('promisify')
-    .use('gateway', { allow: { 'role:test,cmd:ping': true } })
+    .use('@seneca/gateway', { allow: { 'role:test,cmd:ping': true } })
     .use(GatewayCloudflare, {})
 }
 
@@ -115,8 +114,7 @@ describe('gateway-cloudflare', () => {
   test('sets a login cookie via the auth gateway$ directive', async () => {
     const seneca = Seneca({ legacy: false })
       .test()
-      .use('promisify')
-      .use('gateway', { allow: { 'role:test,cmd:login': true } })
+      .use('@seneca/gateway', { allow: { 'role:test,cmd:login': true } })
       .use(GatewayCloudflare, {})
 
     seneca.add(
@@ -143,12 +141,66 @@ describe('gateway-cloudflare', () => {
     expect(setCookie).toContain('seneca-auth=tok-abc')
   })
 
+  // auth.cookie and headers are open option objects: keys that the
+  // defaults do not name, such as a cookie domain, pass through.
+  test('auth cookie and header options pass through', async () => {
+    const seneca = Seneca({ legacy: false })
+      .test()
+      .use('@seneca/gateway', {
+        allow: { 'role:test,cmd:login': true, 'role:test,cmd:logout': true },
+      })
+      .use(GatewayCloudflare, {
+        auth: {
+          token: { name: 'my-session' },
+          cookie: { domain: 'example.com', maxAge: 3600 },
+        },
+        headers: { 'X-Custom': 'yes' },
+      })
+
+    seneca.add(
+      'role:test,cmd:login',
+      function (this: any, _msg: any, reply: any) {
+        reply(null, { ok: true, gateway$: { auth: { token: 'tok-1' } } })
+      },
+    )
+
+    seneca.add(
+      'role:test,cmd:logout',
+      function (this: any, _msg: any, reply: any) {
+        reply(null, { ok: true, gateway$: { auth: { remove: true } } })
+      },
+    )
+
+    await seneca.ready()
+
+    const handler = seneca.export('gateway-cloudflare/handler')
+    const post = (body: any) =>
+      new Request('https://worker.test/api/public/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+    let response = await handler(post({ role: 'test', cmd: 'login' }), {})
+    expect(response.status).toEqual(200)
+    expect(response.headers.get('x-custom')).toEqual('yes')
+    expect(response.headers.get('access-control-allow-origin')).toEqual('*')
+    expect(response.headers.get('set-cookie')).toEqual(
+      'my-session=tok-1; Max-Age=3600; Domain=example.com; Path=/; ' +
+        'HttpOnly; Secure; SameSite=None',
+    )
+
+    response = await handler(post({ role: 'test', cmd: 'logout' }), {})
+    expect(response.headers.get('set-cookie')).toEqual(
+      'my-session=NONE; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+    )
+  })
+
   describe('prepareCloudflareCookieAuth', () => {
     async function makeAuthedSeneca(userForToken: any) {
       const seneca = Seneca({ legacy: false })
         .test()
-        .use('promisify')
-        .use('gateway', {
+        .use('@seneca/gateway', {
           allow: { 'role:test,cmd:whoami': true, 'role:test,cmd:secure': true },
         })
         .use(GatewayCloudflare, {})
@@ -225,8 +277,7 @@ describe('gateway-cloudflare', () => {
     test('user.require blocks the action with 401 when no principal', async () => {
       const seneca = Seneca({ legacy: false })
         .test()
-        .use('promisify')
-        .use('gateway', { allow: { 'role:test,cmd:secure': true } })
+        .use('@seneca/gateway', { allow: { 'role:test,cmd:secure': true } })
         .use(GatewayCloudflare, {})
 
       seneca.add(
